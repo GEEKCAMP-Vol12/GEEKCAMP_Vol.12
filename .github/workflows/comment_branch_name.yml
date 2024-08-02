@@ -1,0 +1,32 @@
+name: Comment branch name
+
+on:
+    issues:
+        types: [opened]
+
+env:
+    APP_NAME: HealthApp
+
+permissions:
+    issues: write
+
+jobs:
+    comment-branch-name:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Add comment
+              run: gh issue comment "$NUMBER" --body "$BODY"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_REPO: ${{ github.repository }}
+                  NUMBER: ${{ github.event.issue.number }}
+                  BODY: |
+                      This issue's work branch is "${{env.APP_NAME}}-${{github.event.issue.number}}".
+                      branch name:
+                      ```
+                      ${{env.APP_NAME}}-${{github.event.issue.number}}
+                      ```
+                      To checkout this branch, run the following command:
+                      ```
+                      git checkout -b ${{env.APP_NAME}}-${{github.event.issue.number}}
+                      ```
