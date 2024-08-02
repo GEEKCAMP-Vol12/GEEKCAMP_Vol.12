@@ -21,7 +21,5 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
-    - name: Mvoe dir to Application directory
-      run: cd ${{env.APP_DIR}}
     - name: Build
-      run: ./gradlew :androidApp:assembleDebug
+      run: cd ${{env.APP_DIR}} && ./gradlew :composeApp:assembleDebug
