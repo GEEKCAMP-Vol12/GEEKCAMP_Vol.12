@@ -10,28 +10,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import di.SampleRepository
 import navigation.BottomNavigationBar
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
+    val sampleRepository = koinInject<SampleRepository>()
     Scaffold(
         modifier = modifier,
         bottomBar = {
             BottomNavigationBar(navController = navController)
         }
     ) {
-       Box(
-           modifier = Modifier
-               .padding(it)
-               .fillMaxSize(),
-           contentAlignment = Alignment.Center
-       ) {
-           Text("Home Screen")
-       }
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Home Screen\n${sampleRepository.getMessage()}")
+        }
     }
 }
 
