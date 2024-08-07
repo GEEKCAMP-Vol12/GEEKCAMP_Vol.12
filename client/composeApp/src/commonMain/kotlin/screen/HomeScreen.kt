@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,6 +20,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -26,6 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,6 +51,37 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
+    val screenDensity = LocalDensity.current.density
+    var screenSizeDp by remember {
+        mutableStateOf(Pair(0f, 0f))
+    }
+    Layout(
+        modifier = modifier,
+        content = {
+            HomeScreenContent(
+                navController = navController,
+                screenSizeDp = screenSizeDp,
+            )
+        }
+    ) { measurables, constraints ->
+        screenSizeDp =
+            Pair(constraints.maxWidth / screenDensity, constraints.maxHeight / screenDensity)
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            val placeable = measurables[0].measure(constraints)
+            placeable.place(0, 0)
+        }
+    }
+}
+
+@Composable
+fun HomeScreenContent(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    screenSizeDp: Pair<Float, Float>,
+) {
+    println("screenSizeDp: $screenSizeDp")
+    val charLayoutInfo = calculateCharLayoutInfo(screenSizeDp)
+    println(charLayoutInfo)
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -126,14 +164,50 @@ fun HomeScreen(
             }
             Image(
                 modifier = Modifier
-                    .scale(1.5f)
-                    .padding(bottom = 100.dp)
+                    .scale(1.0f)
+                    .padding(
+                        top = charLayoutInfo.topMargin.dp,
+                        bottom = charLayoutInfo.bottomMargin.dp,
+                    )
+                    .width(charLayoutInfo.charSize.first.dp)
+                    .height(charLayoutInfo.charSize.second.dp)
                     .align(Alignment.BottomCenter),
                 painter = painterResource(Res.drawable.character_good),
+                contentScale = ContentScale.Fit,
                 contentDescription = "character",
             )
         }
+
     }
+}
+
+data class CharLayoutInfo(
+    val charSize: Pair<Float, Float>,
+    val topMargin: Int,
+    val bottomMargin: Int,
+)
+
+fun calculateCharLayoutInfo(
+    screenSizeDp: Pair<Float, Float>,
+    topUiSize: Int = 220,
+): CharLayoutInfo {
+    if(screenSizeDp.first == 0f || screenSizeDp.second == 0f) {
+        return CharLayoutInfo(
+            charSize = Pair(0f, 0f),
+            topMargin = 0,
+            bottomMargin = 0,
+        )
+    }
+    val availableHeight = screenSizeDp.second - topUiSize
+    val topMargin = availableHeight * 0.1f
+    val bottomMargin = availableHeight * 0.1f
+    val charHeight = availableHeight - topMargin - bottomMargin
+    val charWidth = screenSizeDp.first * 0.8f
+    return CharLayoutInfo(
+        charSize = Pair(charWidth, charHeight),
+        topMargin = topMargin.toInt(),
+        bottomMargin = bottomMargin.toInt(),
+    )
 }
 
 @Preview
