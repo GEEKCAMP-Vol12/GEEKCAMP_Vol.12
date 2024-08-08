@@ -9,5 +9,10 @@ data class Caffeine(
     val createdAt: Long,
     val updatedAt: Long,
 ) {
-    fun calculateScore(): Int = max(0, amountMg - 400)
+    companion object {
+        fun <T : Number> calculateScore(amountMg: T): Int {
+            val amountMgInMg = amountMg.toDouble()
+            return max(0, (amountMgInMg - 400).toInt())
+        }
+    }
 }

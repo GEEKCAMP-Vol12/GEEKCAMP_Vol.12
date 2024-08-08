@@ -9,5 +9,10 @@ data class Sleep(
     val createdAt: Long,
     val updatedAt: Long,
 ) {
-    fun calculateScore(): Int = max(0, 60 * 7 - lengthMin)
+    companion object {
+        fun <T : Number> calculateScore(lengthMin: T): Int {
+            val lengthMinInMinutes = lengthMin.toDouble()
+            return max(0, (60 * 7 - lengthMinInMinutes).toInt())
+        }
+    }
 }
