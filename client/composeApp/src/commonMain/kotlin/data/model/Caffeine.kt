@@ -2,7 +2,7 @@ package data.model
 
 import kotlin.math.max
 
-data class Caffein(
+data class Caffeine(
     val id: Int,
     val amountMg: Int,
     val userId: Int,
