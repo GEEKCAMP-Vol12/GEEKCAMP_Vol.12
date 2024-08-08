@@ -9,5 +9,6 @@ fun MainViewController() = ComposeUIViewController(
     }
 ) {
     val healthAppViewModel: HealthAppViewModel = koinInject()
+    healthAppViewModel.fetchApplicationData()
     App(healthAppViewModel)
 }
