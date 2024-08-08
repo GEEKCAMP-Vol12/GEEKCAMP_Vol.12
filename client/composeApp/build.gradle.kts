@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.lifecycle.viewmodel)
+            implementation(libs.kotlinx.datetime)
             implementation(compose.materialIconsExtended)
             implementation(compose.components.uiToolingPreview)
             implementation(compose.runtime)
