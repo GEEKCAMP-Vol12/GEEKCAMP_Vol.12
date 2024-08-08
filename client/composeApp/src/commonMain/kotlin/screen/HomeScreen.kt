@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -79,9 +80,14 @@ fun HomeScreenContent(
     navController: NavController,
     screenSizeDp: Pair<Float, Float>,
 ) {
-    println("screenSizeDp: $screenSizeDp")
-    val charLayoutInfo = calculateCharLayoutInfo(screenSizeDp)
-    println(charLayoutInfo)
+    val screenDensity = LocalDensity.current.density
+    var topUiHeight by remember {
+        mutableStateOf(0)
+    }
+    val homeScreenLayoutInfo = remember(topUiHeight) {
+        val result = calculateHomeScreenLayoutInfo(screenSizeDp, topUiHeight)
+        mutableStateOf(result)
+    }.value
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -113,64 +119,20 @@ fun HomeScreenContent(
                 contentDescription = "background",
                 contentScale = ContentScale.Crop
             )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                ) {
-                    Column {
-                        Text(
-                            modifier = Modifier.padding(bottom = 8.dp),
-                            text = "2024/08/05 ~ 2024/08/11",
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                        Text("平均睡眠時間：　8時間")
-                        Text("平均カフェイン摂取量：　500mg")
-                    }
+            HomeScreenTopUi(
+                modifier = Modifier.onGloballyPositioned {
+                    topUiHeight = (it.size.height / screenDensity).toInt()
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .width(120.dp)
-                            .background(Color.White)
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("状態：　")
-                        Box(
-                            modifier = Modifier.size(80.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text("😀", fontSize = 24.sp)
-                        }
-                    }
-                }
-
-            }
+            )
             Image(
                 modifier = Modifier
                     .scale(1.0f)
                     .padding(
-                        top = charLayoutInfo.topMargin.dp,
-                        bottom = charLayoutInfo.bottomMargin.dp,
+                        top = homeScreenLayoutInfo.topMargin.dp,
+                        bottom = homeScreenLayoutInfo.bottomMargin.dp,
                     )
-                    .width(charLayoutInfo.charSize.first.dp)
-                    .height(charLayoutInfo.charSize.second.dp)
+                    .width(homeScreenLayoutInfo.charSize.first.dp)
+                    .height(homeScreenLayoutInfo.charSize.second.dp)
                     .align(Alignment.BottomCenter),
                 painter = painterResource(Res.drawable.character_good),
                 contentScale = ContentScale.Fit,
@@ -181,29 +143,80 @@ fun HomeScreenContent(
     }
 }
 
-data class CharLayoutInfo(
-    val charSize: Pair<Float, Float>,
-    val topMargin: Int,
-    val bottomMargin: Int,
+@Composable
+fun HomeScreenTopUi(
+    modifier: Modifier,
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White)
+                .fillMaxWidth()
+                .padding(8.dp),
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = "2024/08/05 ~ 2024/08/11",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Text("平均睡眠時間：　8時間")
+                Text("平均カフェイン摂取量：　500mg")
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .width(120.dp)
+                    .background(Color.White)
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("状態：　")
+                Box(
+                    modifier = Modifier.size(80.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("😀", fontSize = 24.sp)
+                }
+            }
+        }
+
+    }
+}
+
+data class HomeScreenLayoutInfo(
+    val charSize: Pair<Float, Float> = Pair(0f, 0f),
+    val topMargin: Int = 0,
+    val bottomMargin: Int = 0,
 )
 
-fun calculateCharLayoutInfo(
+fun calculateHomeScreenLayoutInfo(
     screenSizeDp: Pair<Float, Float>,
     topUiSize: Int = 220,
-): CharLayoutInfo {
-    if(screenSizeDp.first == 0f || screenSizeDp.second == 0f) {
-        return CharLayoutInfo(
-            charSize = Pair(0f, 0f),
-            topMargin = 0,
-            bottomMargin = 0,
-        )
+): HomeScreenLayoutInfo {
+    println(topUiSize)
+    if(screenSizeDp.first == 0f || screenSizeDp.second == 0f || topUiSize == 0) {
+        return HomeScreenLayoutInfo()
     }
     val availableHeight = screenSizeDp.second - topUiSize
     val topMargin = availableHeight * 0.1f
     val bottomMargin = availableHeight * 0.1f
     val charHeight = availableHeight - topMargin - bottomMargin
     val charWidth = screenSizeDp.first * 0.8f
-    return CharLayoutInfo(
+    return HomeScreenLayoutInfo(
         charSize = Pair(charWidth, charHeight),
         topMargin = topMargin.toInt(),
         bottomMargin = bottomMargin.toInt(),
