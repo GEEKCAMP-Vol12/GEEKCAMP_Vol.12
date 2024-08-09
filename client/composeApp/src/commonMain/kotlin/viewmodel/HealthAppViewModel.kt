@@ -31,7 +31,6 @@ class HealthAppViewModel : ViewModel() {
 
             _appViewState.value = Lce.Content(
                 AppViewState(
-                    isLoading = false,
                     currentUserData = user,
                     currentWeekSleepData = sleepData,
                     currentWeekCaffeineData = caffeineData
@@ -57,7 +56,6 @@ class HealthAppViewModel : ViewModel() {
 }
 
 data class AppViewState(
-    val isLoading: Boolean = true,
     val currentUserData: User? = null,
     val currentWeekSleepData: List<Sleep>? = null,
     val currentWeekCaffeineData: List<Caffeine>? = null,
