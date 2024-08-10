@@ -46,6 +46,7 @@ fun MainNavHost(
             HomeScreen(
                 homeScreenArg = homeScreenArg,
                 navController = navController,
+                updateUserData = healthAppViewModel::updateUserData,
             )
         }
         composable<NavigationDestination.Ranking> {

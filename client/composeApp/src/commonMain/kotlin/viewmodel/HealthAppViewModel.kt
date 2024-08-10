@@ -39,6 +39,10 @@ class HealthAppViewModel : ViewModel() {
         }
     }
 
+    fun updateUserData() {
+        // Todo update user data
+    }
+
     private suspend fun fetchCurrentWeekSleepData(): List<Sleep> {
         delay(3_000)
         return demoSleepData.take(7)
