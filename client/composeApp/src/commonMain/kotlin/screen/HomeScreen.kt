@@ -21,6 +21,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,8 +41,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import component.AddLogDialog
+import component.ReferenceDialog
 import data.model.Lce
 import healthapp.composeapp.generated.resources.Res
 import healthapp.composeapp.generated.resources.character_bad
@@ -52,17 +56,22 @@ import healthapp.composeapp.generated.resources.room_sunny
 import navigation.BottomNavigationBar
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
+import viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     homeScreenArg: Lce<HomeScreenArg>,
+    updateUserData: () -> Unit,
 ) {
     val screenDensity = LocalDensity.current.density
     var screenSizeDp by remember {
         mutableStateOf(Pair(0f, 0f))
     }
+    println("homeScreenArg: $homeScreenArg")
     Layout(
         modifier = modifier,
         content = {
@@ -70,6 +79,7 @@ fun HomeScreen(
                 navController = navController,
                 screenSizeDp = screenSizeDp,
                 homeScreenArg = homeScreenArg,
+                updateUserData = updateUserData,
             )
         }
     ) { measurables, constraints ->
@@ -88,23 +98,19 @@ fun HomeScreenContent(
     navController: NavController,
     homeScreenArg: Lce<HomeScreenArg>,
     screenSizeDp: Pair<Float, Float>,
+    updateUserData: () -> Unit,
 ) {
     val screenDensity = LocalDensity.current.density
-    var topUiHeight by remember {
-        mutableStateOf(0)
-    }
-    val homeScreenLayoutInfo = remember(topUiHeight) {
-        val result = calculateHomeScreenLayoutInfo(screenSizeDp, topUiHeight)
-        mutableStateOf(result)
-    }.value
     val homeScreenData = homeScreenArg.getIfContent() ?: HomeScreenArg.INITIAL_VALUE
+    val homeViewModel = koinViewModel<HomeViewModel> { parametersOf(updateUserData) }
+    val homeViewState = homeViewModel.homeViewState.collectAsStateWithLifecycle().value
+    derivedStateOf(updateUserData)
+    homeViewModel.updateScreenSizeDp(newSize = screenSizeDp)
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-
-                },
+                onClick = homeViewModel::openAddLogDialog,
                 content = {
                     Icon(Icons.Rounded.Add, contentDescription = "Add Log")
                 },
@@ -131,7 +137,7 @@ fun HomeScreenContent(
             )
             HomeScreenTopUi(
                 modifier = Modifier.onGloballyPositioned {
-                    topUiHeight = (it.size.height / screenDensity).toInt()
+                    homeViewModel.updateTopUiHeight(it.size.height / screenDensity.toInt())
                 },
                 startDate = homeScreenData.startDate,
                 endDate = homeScreenData.endDate,
@@ -144,11 +150,11 @@ fun HomeScreenContent(
                     modifier = Modifier
                         .scale(1.0f)
                         .padding(
-                            top = homeScreenLayoutInfo.topMargin.dp,
-                            bottom = homeScreenLayoutInfo.bottomMargin.dp,
+                            top = homeViewState.homeScreenLayoutInfo.topMargin.dp,
+                            bottom = homeViewState.homeScreenLayoutInfo.bottomMargin.dp,
                         )
-                        .width(homeScreenLayoutInfo.charSize.first.dp)
-                        .height(homeScreenLayoutInfo.charSize.second.dp)
+                        .width(homeViewState.homeScreenLayoutInfo.charSize.first.dp)
+                        .height(homeViewState.homeScreenLayoutInfo.charSize.second.dp)
                         .align(Alignment.BottomCenter),
                     painter = painterResource(
                         when (homeScreenData.healthStatus) {
@@ -182,6 +188,20 @@ fun HomeScreenContent(
                 CircularProgressIndicator()
             }
         }
+    }
+
+    if (homeViewState.shouldShowAddLogDialog) {
+        AddLogDialog(
+            onDismissRequest = homeViewModel::closeAddLogDialog,
+            onSubmit = homeViewModel::onSubmitNewLog,
+            onCancel = homeViewModel::onCancelNewLog,
+            showReferenceDialog = homeViewModel::openReferDialog,
+        )
+    }
+    if (homeViewState.shouldShowAddLogDialog && homeViewState.shouldShowReferDialog) {
+        ReferenceDialog(
+            onDismissRequest = homeViewModel::closeReferDialog,
+        )
     }
 }
 
@@ -285,26 +305,6 @@ data class HomeScreenLayoutInfo(
     val bottomMargin: Int = 0,
 )
 
-fun calculateHomeScreenLayoutInfo(
-    screenSizeDp: Pair<Float, Float>,
-    topUiSize: Int = 220,
-): HomeScreenLayoutInfo {
-    println(topUiSize)
-    if (screenSizeDp.first == 0f || screenSizeDp.second == 0f || topUiSize == 0) {
-        return HomeScreenLayoutInfo()
-    }
-    val availableHeight = screenSizeDp.second - topUiSize
-    val topMargin = availableHeight * 0.1f
-    val bottomMargin = availableHeight * 0.1f
-    val charHeight = availableHeight - topMargin - bottomMargin
-    val charWidth = screenSizeDp.first * 0.8f
-    return HomeScreenLayoutInfo(
-        charSize = Pair(charWidth, charHeight),
-        topMargin = topMargin.toInt(),
-        bottomMargin = bottomMargin.toInt(),
-    )
-}
-
 @Preview
 @Composable
 fun HomeScreenPreview() {
@@ -319,6 +319,7 @@ fun HomeScreenPreview() {
                 healthStatus = HealthStatus.Good,
             )
         ),
-        navController = rememberNavController()
+        navController = rememberNavController(),
+        updateUserData = {},
     )
 }
