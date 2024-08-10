@@ -6,7 +6,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    kotlin("plugin.serialization") version "2.0.0"
+    id("com.google.devtools.ksp") version "1.6.0-1.0.0-beta07"
+    id("de.jensklingenberg.ktorfit") version "2.0.0"
 }
 
 kotlin {
@@ -16,7 +17,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -27,9 +28,9 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -50,6 +51,11 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation("io.ktor:ktor-client-apache5:2.37")
+            implementation("io.ktor:ktor-client-jetty:2.37")
+            implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.0.0")
+            implementation("io.ktor:ktor-client-core:2.37")
+            implementation("io.ktor:ktor-client-cio:2.37")
         }
     }
 }
@@ -87,7 +93,7 @@ android {
         compose = true
     }
     dependencies {
+
         debugImplementation(compose.uiTooling)
     }
 }
-
