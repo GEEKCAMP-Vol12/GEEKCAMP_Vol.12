@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -59,6 +62,7 @@ fun MyLogScreen(
             .padding(it)
             .padding(16.dp)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
         ){
             Box(modifier = Modifier.padding(bottom = 32.dp)) {
                 Column {
@@ -125,7 +129,9 @@ fun MyLogScreen(
                         Text("")
                     }
 
-                    LazyColumn {
+                    LazyColumn(
+                        modifier = Modifier.height(300.dp)
+                    ) {
                         items(listOf("1","2","3","4","5")){
                             if(check) {
                                 MyLogSleepItem()
@@ -149,8 +155,8 @@ fun MyLogSleepItem() {
     Card(border = BorderStroke(width = 2.dp, color = Color.Black), modifier = Modifier.padding(bottom = 4.dp))
     {
         Row(modifier = Modifier.padding(8.dp)){
-            Text("2024/08/08", modifier = Modifier.weight(3f),style = TextStyle(fontSize = 24.sp))
-            Text("10h30m",modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
+            Text("2024/08/08", modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
+            Text("10h30m",modifier = Modifier,style = TextStyle(fontSize = 24.sp))
         }
     }
 }
