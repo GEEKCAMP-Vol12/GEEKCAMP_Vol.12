@@ -6,8 +6,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    id("com.google.devtools.ksp") version "1.6.0-1.0.0-beta07"
+    id("com.google.devtools.ksp") version "2.0.10-1.0.24"
     id("de.jensklingenberg.ktorfit") version "2.0.0"
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 kotlin {
@@ -29,6 +30,8 @@ kotlin {
         }
     }
 
+    val ktorfitVersion = "2.0.0"
+    val ktor_version = "2.3.11"
     sourceSets {
 
         androidMain.dependencies {
@@ -36,6 +39,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.koin.android.compose)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(libs.koin.core)
@@ -51,11 +55,15 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation("io.ktor:ktor-client-apache5:2.37")
-            implementation("io.ktor:ktor-client-jetty:2.37")
-            implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.0.0")
-            implementation("io.ktor:ktor-client-core:2.37")
-            implementation("io.ktor:ktor-client-cio:2.37")
+
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktorfit.lib)
+            implementation(libs.ktor.content.negotiation)
+            implementation(libs.ktor.serialization)
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
