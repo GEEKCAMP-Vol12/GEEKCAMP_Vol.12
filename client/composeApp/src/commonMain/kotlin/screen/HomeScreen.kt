@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -38,10 +39,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import data.model.Lce
 import healthapp.composeapp.generated.resources.Res
+import healthapp.composeapp.generated.resources.character_bad
+import healthapp.composeapp.generated.resources.character_down
 import healthapp.composeapp.generated.resources.character_good
+import healthapp.composeapp.generated.resources.character_mid
 import healthapp.composeapp.generated.resources.room_sunny
 import navigation.BottomNavigationBar
 import org.jetbrains.compose.resources.painterResource
@@ -51,6 +57,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    homeScreenArg: Lce<HomeScreenArg>,
 ) {
     val screenDensity = LocalDensity.current.density
     var screenSizeDp by remember {
@@ -62,6 +69,7 @@ fun HomeScreen(
             HomeScreenContent(
                 navController = navController,
                 screenSizeDp = screenSizeDp,
+                homeScreenArg = homeScreenArg,
             )
         }
     ) { measurables, constraints ->
@@ -78,6 +86,7 @@ fun HomeScreen(
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     navController: NavController,
+    homeScreenArg: Lce<HomeScreenArg>,
     screenSizeDp: Pair<Float, Float>,
 ) {
     val screenDensity = LocalDensity.current.density
@@ -88,6 +97,7 @@ fun HomeScreenContent(
         val result = calculateHomeScreenLayoutInfo(screenSizeDp, topUiHeight)
         mutableStateOf(result)
     }.value
+    val homeScreenData = homeScreenArg.getIfContent() ?: HomeScreenArg.INITIAL_VALUE
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -122,30 +132,67 @@ fun HomeScreenContent(
             HomeScreenTopUi(
                 modifier = Modifier.onGloballyPositioned {
                     topUiHeight = (it.size.height / screenDensity).toInt()
-                }
+                },
+                startDate = homeScreenData.startDate,
+                endDate = homeScreenData.endDate,
+                averageSleepHour = homeScreenData.averageSleepHour,
+                averageCaffeineMg = homeScreenData.averageCaffeineMg,
+                healthStatus = homeScreenData.healthStatus,
             )
-            Image(
-                modifier = Modifier
-                    .scale(1.0f)
-                    .padding(
-                        top = homeScreenLayoutInfo.topMargin.dp,
-                        bottom = homeScreenLayoutInfo.bottomMargin.dp,
-                    )
-                    .width(homeScreenLayoutInfo.charSize.first.dp)
-                    .height(homeScreenLayoutInfo.charSize.second.dp)
-                    .align(Alignment.BottomCenter),
-                painter = painterResource(Res.drawable.character_good),
-                contentScale = ContentScale.Fit,
-                contentDescription = "character",
-            )
+            if (homeScreenData.healthStatus != HealthStatus.Unknown) {
+                Image(
+                    modifier = Modifier
+                        .scale(1.0f)
+                        .padding(
+                            top = homeScreenLayoutInfo.topMargin.dp,
+                            bottom = homeScreenLayoutInfo.bottomMargin.dp,
+                        )
+                        .width(homeScreenLayoutInfo.charSize.first.dp)
+                        .height(homeScreenLayoutInfo.charSize.second.dp)
+                        .align(Alignment.BottomCenter),
+                    painter = painterResource(
+                        when (homeScreenData.healthStatus) {
+                            HealthStatus.Good -> Res.drawable.character_good
+                            HealthStatus.Mid -> Res.drawable.character_mid
+                            HealthStatus.Bad -> Res.drawable.character_bad
+                            HealthStatus.Down -> Res.drawable.character_down
+                            else -> Res.drawable.character_good
+                        }
+                    ),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "character",
+                )
+            }
         }
+    }
 
+    if (homeScreenArg is Lce.Loading) {
+        Dialog(onDismissRequest = {}) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = "読み込み中..."
+                )
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 
 @Composable
 fun HomeScreenTopUi(
     modifier: Modifier,
+    startDate: String,
+    endDate: String,
+    averageSleepHour: String,
+    averageCaffeineMg: String,
+    healthStatus: HealthStatus,
 ) {
     Column(
         modifier = modifier
@@ -161,14 +208,14 @@ fun HomeScreenTopUi(
             Column {
                 Text(
                     modifier = Modifier.padding(bottom = 8.dp),
-                    text = "2024/08/05 ~ 2024/08/11",
+                    text = "$startDate ~ $endDate",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 )
-                Text("平均睡眠時間：　8時間")
-                Text("平均カフェイン摂取量：　500mg")
+                Text("平均睡眠時間：　${averageSleepHour}時間")
+                Text("平均カフェイン摂取量：　${averageCaffeineMg}mg")
             }
         }
         Row(
@@ -189,12 +236,47 @@ fun HomeScreenTopUi(
                     modifier = Modifier.size(80.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("😀", fontSize = 24.sp)
+                    Text(
+                        text = when (healthStatus) {
+                            HealthStatus.Good -> "😀"
+                            HealthStatus.Mid -> "🙂"
+                            HealthStatus.Bad -> "🥲"
+                            HealthStatus.Down -> "🥶"
+                            HealthStatus.Unknown -> ""
+                        },
+                        fontSize = 24.sp
+                    )
                 }
             }
         }
 
     }
+}
+
+data class HomeScreenArg(
+    val startDate: String,
+    val endDate: String,
+    val averageSleepHour: String,
+    val averageCaffeineMg: String,
+    val healthStatus: HealthStatus,
+) {
+    companion object {
+        val INITIAL_VALUE = HomeScreenArg(
+            startDate = "----",
+            endDate = "----",
+            averageSleepHour = "----",
+            averageCaffeineMg = "----",
+            healthStatus = HealthStatus.Unknown,
+        )
+    }
+}
+
+enum class HealthStatus {
+    Good,
+    Mid,
+    Bad,
+    Down,
+    Unknown,
 }
 
 data class HomeScreenLayoutInfo(
@@ -208,7 +290,7 @@ fun calculateHomeScreenLayoutInfo(
     topUiSize: Int = 220,
 ): HomeScreenLayoutInfo {
     println(topUiSize)
-    if(screenSizeDp.first == 0f || screenSizeDp.second == 0f || topUiSize == 0) {
+    if (screenSizeDp.first == 0f || screenSizeDp.second == 0f || topUiSize == 0) {
         return HomeScreenLayoutInfo()
     }
     val availableHeight = screenSizeDp.second - topUiSize
@@ -226,5 +308,17 @@ fun calculateHomeScreenLayoutInfo(
 @Preview
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(navController = rememberNavController())
+    HomeScreen(
+        homeScreenArg =
+        Lce.Content(
+            HomeScreenArg(
+                startDate = "2024/08/05",
+                endDate = "2024/08/11",
+                averageSleepHour = "8",
+                averageCaffeineMg = "500",
+                healthStatus = HealthStatus.Good,
+            )
+        ),
+        navController = rememberNavController()
+    )
 }
