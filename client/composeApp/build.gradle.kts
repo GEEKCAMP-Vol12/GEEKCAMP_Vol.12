@@ -6,8 +6,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    id("com.google.devtools.ksp") version "2.0.10-1.0.24"
-    id("de.jensklingenberg.ktorfit") version "2.0.0"
+    alias(libs.plugins.kotlinKsp)
+    alias(libs.plugins.ktorfit)
     kotlin("plugin.serialization") version "2.0.0"
 }
 
@@ -30,8 +30,6 @@ kotlin {
         }
     }
 
-    val ktorfitVersion = "2.0.0"
-    val ktor_version = "2.3.11"
     sourceSets {
 
         androidMain.dependencies {
@@ -60,7 +58,6 @@ kotlin {
             implementation(libs.ktorfit.lib)
             implementation(libs.ktor.content.negotiation)
             implementation(libs.ktor.serialization)
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
