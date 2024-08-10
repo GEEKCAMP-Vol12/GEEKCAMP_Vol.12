@@ -7,18 +7,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -52,25 +57,39 @@ fun MyLogScreen(
             BottomNavigationBar(navController = navController)
         }
     ){
-        Column (modifier = Modifier.padding(it).padding(16.dp)) {
+        Column (modifier = Modifier
+            .background(color = Color(0xFFF5F4A5))
+            .padding(it)
+            .padding(16.dp)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+        ){
             Box(modifier = Modifier.padding(bottom = 32.dp)) {
                 Column {
-                    Text("平均睡眠時間：8h",textAlign = TextAlign.Left,
+                    var check by remember { mutableStateOf(true) }
+                    var checked = false
+                    Column (
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        style = TextStyle(fontSize = 20.sp)
-                    )
-                    Text("合計カフェイン摂取量：500mg",
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White)
                             .fillMaxWidth()
-                            .padding(bottom = 32.dp),
-                        style = TextStyle(fontSize = 20.sp)
-                    )
+                            .padding(8.dp),){
+                        Text(
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            text = "2024/08/11 ~ 2024/08/18",
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        Text("平均睡眠時間：　7.5時間")
+                        Text("平均カフェイン摂取量：　375mg")
+                    }
+
                     Row(modifier = Modifier.padding(bottom = 16.dp),
                         verticalAlignment = Alignment.CenterVertically)
                     {
-                        var check by remember { mutableStateOf(true) }
+
                         if(check) {
                             Text(
                                 "睡眠時間",
@@ -88,13 +107,17 @@ fun MyLogScreen(
                         }
 
                         Switch(checked = check,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color(0xFF34342D), // チェック時のサークルの色
+                                uncheckedThumbColor = Color(0xFFFFFFFF), // 未チェック時のサークルの色
+                                checkedTrackColor = Color.Gray.copy(alpha = 0.5f), // チェック時のトラックの色
+                                uncheckedTrackColor = Color.Gray.copy(alpha = 0.5f)), // 未チェック時のトラックの色
                             onCheckedChange = {
                                 check = it
                             }
                         )
                         Dropdown()
                     }
-
 
 
                     Box(modifier = Modifier
@@ -106,9 +129,18 @@ fun MyLogScreen(
                         Text("")
                     }
 
-                    LazyColumn {
+                    LazyColumn(
+                        modifier = Modifier.height(300.dp)
+                    ) {
                         items(listOf("1","2","3","4","5")){
-                            MyLogItem()
+                            if(check) {
+                                MyLogSleepItem()
+
+                            }else {
+                                MyLogCaffeineItem()
+
+                            }
+
 
                         }
                     }
@@ -117,13 +149,25 @@ fun MyLogScreen(
         }
     }
 }
+
 @Composable
-fun MyLogItem() {
+fun MyLogSleepItem() {
+    Card(border = BorderStroke(width = 2.dp, color = Color.Black), modifier = Modifier.padding(bottom = 4.dp))
+    {
+        Row(modifier = Modifier.padding(8.dp)){
+            Text("2024/08/08", modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
+            Text("10h30m",modifier = Modifier,style = TextStyle(fontSize = 24.sp))
+        }
+    }
+}
+
+@Composable
+fun MyLogCaffeineItem() {
     Card(border = BorderStroke(width = 2.dp, color = Color.Black), modifier = Modifier.padding(bottom = 4.dp))
     {
         Row(modifier = Modifier.padding(8.dp)){
             Text("2024/08/08", modifier = Modifier.weight(3f),style = TextStyle(fontSize = 24.sp))
-            Text("10h30m",modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
+            Text("100mg",modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
         }
     }
 }
@@ -139,8 +183,9 @@ fun Dropdown() {
         modifier = Modifier
             .size(60.dp, 30.dp)
             .clip(RoundedCornerShape(4.dp))
+            .background(color = Color(0xFFFFFFFF))
             .border(BorderStroke(1.dp, Color.Black), RoundedCornerShape(4.dp))
-            .clickable { expanded.value = !expanded.value },
+            .clickable { expanded.value = !expanded.value }
     ) {
         Text(
             text = selectedOptionText.value,
