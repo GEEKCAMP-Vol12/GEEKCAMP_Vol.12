@@ -18,6 +18,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -51,21 +52,22 @@ fun RankingScreen(
             Box(
                 modifier = Modifier.padding(bottom = 32.dp)
             ){
-                Column(modifier = Modifier.background(color = Color(0xFFFFFFFF),RoundedCornerShape(8.dp))
-                    .padding(top = 8.dp,bottom = 8.dp),
-
-                    ) {
-                    Text("平均睡眠時間：8h",textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        style = TextStyle(fontSize = 20.sp)
+                Column (
+                    modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(8.dp),){
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = "2024/08/11 ~ 2024/08/18",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                    Text("合計カフェイン摂取量：500mg",
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        style = TextStyle(fontSize = 20.sp)
-                    )
+                    Text("平均睡眠時間：　7.5時間")
+                    Text("平均カフェイン摂取量：　375mg")
                 }
             }
 
