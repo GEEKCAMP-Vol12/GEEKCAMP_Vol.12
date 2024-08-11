@@ -15,17 +15,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.ListItem
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -82,8 +79,8 @@ fun RankingScreen(
                 style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp))
 
             LazyColumn(modifier = Modifier.padding(bottom = 32.dp).height(300.dp)) {
-                items(listOf("1","2","3","4","5")){
-                    RankingItem()
+                items(demoRankingData){
+                    RankingItem(it.rank, it.name, it.point)
                 }
             }
             Text("自分の順位",
@@ -91,19 +88,56 @@ fun RankingScreen(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                 style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp)
             )
-            RankingItem()
+            RankingItem(1, "不健康太郎", 1000)
         }
     }
 }
 
+data class RankingData(
+    val rank: Int,
+    val name: String,
+    val point: Int
+)
+
+val demoRankingData = listOf(
+    RankingData(
+        rank = 1,
+        name = "不健康太郎",
+        point = 1000
+    ),
+    RankingData(
+        rank = 2,
+        name = "山田花子",
+        point = 820
+    ),
+    RankingData(
+        rank = 3,
+        name = "田中太郎",
+        point = 800
+    ),
+    RankingData(
+        rank = 4,
+        name = "佐藤花子",
+        point = 750
+    ),
+    RankingData(
+        rank = 5,
+        name = "鈴木太郎",
+        point = 700
+    )
+)
+
 @Composable
-fun RankingItem() {
+fun RankingItem(rank: Int, name: String, point: Int) {
     Card(border = BorderStroke(width = 2.dp, color = Color.Black), modifier = Modifier.padding(bottom = 4.dp))
     {
-        Row(modifier = Modifier.padding(8.dp)){
-            Text("１", modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp), textAlign = TextAlign.Center)
-            Text("名前", modifier = Modifier.weight(4f),style = TextStyle(fontSize = 24.sp))
-            Text("123ポイント",modifier = Modifier.weight(4f),style = TextStyle(fontSize = 24.sp))
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ){
+            Text("$rank", modifier = Modifier.padding(end = 8.dp),style = TextStyle(fontSize = 24.sp), textAlign = TextAlign.Center)
+            Text(name, modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
+            Text("${point}ポイント",modifier = Modifier,style = TextStyle(fontSize = 24.sp))
         }
     }
 }
