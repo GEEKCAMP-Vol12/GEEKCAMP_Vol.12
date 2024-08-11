@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import data.model.Caffeine
+import healthapp.composeapp.generated.resources.Res
 import navigation.BottomNavigationBar
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -132,9 +134,9 @@ fun MyLogScreen(
                     LazyColumn(
                         modifier = Modifier.height(300.dp)
                     ) {
-                        items(listOf("1","2","3","4","5")){
+                        items(demoMyLogData){
                             if(check) {
-                                MyLogSleepItem()
+                                MyLogSleepItem(it.date, it.sleepTime)
 
                             }else {
                                 MyLogCaffeineItem()
@@ -150,13 +152,41 @@ fun MyLogScreen(
     }
 }
 
+data class MyLogData(
+    val date: String,
+    val sleepTime: String
+)
+
+val demoMyLogData = listOf(
+    MyLogData(
+        date = "2024/08/18",
+        sleepTime = "8h00m"
+    ),
+    MyLogData(
+        date = "2024/08/17",
+        sleepTime = "7h30m"
+    ),
+    MyLogData(
+        date = "2024/08/16",
+        sleepTime = "6h00m"
+    ),
+    MyLogData(
+        date = "2024/08/15",
+        sleepTime = "6h30m"
+    ),
+    MyLogData(
+        date = "2024/08/14",
+        sleepTime = "5h30m"
+    )
+)
+
 @Composable
-fun MyLogSleepItem() {
+fun MyLogSleepItem(date: String,sleepTime: String) {
     Card(border = BorderStroke(width = 2.dp, color = Color.Black), modifier = Modifier.padding(bottom = 4.dp))
     {
         Row(modifier = Modifier.padding(8.dp)){
-            Text("2024/08/08", modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
-            Text("10h30m",modifier = Modifier,style = TextStyle(fontSize = 24.sp))
+            Text(date, modifier = Modifier.weight(1f),style = TextStyle(fontSize = 24.sp))
+            Text(sleepTime ,modifier = Modifier,style = TextStyle(fontSize = 24.sp))
         }
     }
 }
